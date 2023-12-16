@@ -1,0 +1,127 @@
+int main() {
+    // Initialize GLFW
+    if (!glfwInit()) {
+        std::cerr << "GLFW initialization failed" << std::endl;
+        return EXIT_FAILURE;
+    }
+
+    // GLFW window creation
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 1);
+    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+    glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
+
+    GLFWwindow* window = glfwCreateWindow(windowWidth, windowHeight, "Drawing Objects", nullptr, nullptr);
+    if (!window) {
+        std::cerr << "Failed to create GLFW window" << std::endl;
+        glfwTerminate();
+        return EXIT_FAILURE;
+    }
+    glfwMakeContextCurrent(window);
+
+    // Initialize GLEW
+    glewExperimental = GL_TRUE;
+    if (glewInit() != GLEW_OK) {
+        std::cerr << "Failed to initialize GLEW" << std::endl;
+        return EXIT_FAILURE;
+    }
+
+    glViewport(0, 0, windowWidth, windowHeight);
+
+    // Compile shaders
+    GLuint vertexShader = glCreateShader(GL_VERTEX_SHADER);
+    glShaderSource(vertexShader, 1, &vertexShaderSource, nullptr);
+    glCompileShader(vertexShader);
+
+    GLuint fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
+    glShaderSource(fragmentShader, 1, &fragmentShaderSource, nullptr);
+    glCompileShader(fragmentShader);
+
+    // Link shaders into a shader program
+    gProgramId = glCreateProgram();
+    glAttachShader(gProgramId, vertexShader);
+    glAttachShader(gProgramId, fragmentShader);
+    glLinkProgram(gProgramId);
+
+    // Delete shaders as they're linked into our program now and no longer necessary
+    glDeleteShader(vertexShader);
+    glDeleteShader(fragmentShader);
+
+    // Check if shader compilation and linking were successful
+    GLint success;
+    glGetProgramiv(gProgramId, GL_LINK_STATUS, &success);
+    if (!success) {
+        GLchar infoLog[512];
+        glGetProgramInfoLog(gProgramId, 512, nullptr, infoLog);
+        std::string errorMessage = "Shader linking error: ";
+        errorMessage += infoLog;
+        LogError(errorMessage);
+    }
+
+    // Set up vertex data and buffers for each object
+    // ...
+
+    // Bind Vertex Array Object
+    glGenVertexArrays(1, &bookVAO);
+    glGenBuffers(1, &bookVBO);
+    glGenBuffers(1, &bookEBO);
+
+    glBindVertexArray(bookVAO);
+
+    glBindBuffer(GL_ARRAY_BUFFER, bookVBO);
+    glBufferData(GL_ARRAY_BUFFER, bookVerticesSize, bookVertices, GL_STATIC_DRAW);
+
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bookEBO);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, bookIndicesSize, bookIndices, GL_STATIC_DRAW);
+
+    // Position attribute
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (GLvoid*)0);
+    glEnableVertexAttribArray(0);
+
+    // Color attribute
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (GLvoid*)(3 * sizeof(GLfloat)));
+    glEnableVertexAttribArray(1);
+
+    // Texture Coordinate attribute
+    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (GLvoid*)(6 * sizeof(GLfloat)));
+    glEnableVertexAttribArray(2);
+
+    glBindVertexArray(0); // Unbind bookVAO
+
+    // Load textures and set texture uniforms
+    // ...
+
+    // Main render loop
+    while (!glfwWindowShouldClose(window)) {
+        glfwPollEvents();
+
+        glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+        glUseProgram(gProgramId);
+
+        // Bind book texture and draw book
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, bookTextureId);
+        glUniform1i(glGetUniformLocation(gProgramId, "textureSampler1"), 0);
+
+        glBindVertexArray(bookVAO);
+        glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_SHORT, 0);
+        glBindVertexArray(0);
+
+        // Repeat the above process for other objects (pen, glasses, cup)
+
+        glfwSwapBuffers(window);
+    }
+
+    // Clean up
+    glDeleteVertexArrays(1, &bookVAO);
+    glDeleteBuffers(1, &bookVBO);
+    glDeleteBuffers(1, &bookEBO);
+
+    // Delete other VAOs, VBOs, textures, etc., for other objects
+
+    glfwTerminate();
+    return 0;
+}
+

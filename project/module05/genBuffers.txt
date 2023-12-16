@@ -1,0 +1,82 @@
+#include <GL/glew.h>
+#include <GLFW/glfw3.h>
+
+// Vertex data for book, pen, glasses, and cup
+GLfloat bookVertices[] = { /* Book vertex data */ };
+GLfloat penVertices[] = { /* Pen vertex data */ };
+GLfloat glassesVertices[] = { /* Glasses vertex data */ };
+GLfloat cupVertices[] = { /* Cup vertex data */ };
+
+void setupObject(GLuint &VAO, GLuint &VBO, GLfloat vertices[], int vertexCount) {
+    glGenVertexArrays(1, &VAO);
+    glBindVertexArray(VAO);
+
+    glGenBuffers(1, &VBO);
+    glBindBuffer(GL_ARRAY_BUFFER, VBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * vertexCount, vertices, GL_STATIC_DRAW);
+
+    // Set vertex attribute pointers
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (void*)0);
+    glEnableVertexAttribArray(0);
+
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glBindVertexArray(0);
+}
+
+int main() {
+    // Initialize GLFW, create window, etc.
+
+    // OpenGL setup code (context creation, etc.)
+    // ...
+
+    // Set up buffers for each object
+    GLuint bookVAO, bookVBO;
+    setupObject(bookVAO, bookVBO, bookVertices, sizeof(bookVertices));
+
+    GLuint penVAO, penVBO;
+    setupObject(penVAO, penVBO, penVertices, sizeof(penVertices));
+
+    GLuint glassesVAO, glassesVBO;
+    setupObject(glassesVAO, glassesVBO, glassesVertices, sizeof(glassesVertices));
+
+    GLuint cupVAO, cupVBO;
+    setupObject(cupVAO, cupVBO, cupVertices, sizeof(cupVertices));
+
+    while (!glfwWindowShouldClose(window)) {
+        // Render loop
+
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+        // Render book
+        glBindVertexArray(bookVAO);
+        // Draw book
+        // glDrawArrays(GL_TRIANGLES, ...);
+
+        // Render pen
+        glBindVertexArray(penVAO);
+        // Draw pen
+        // glDrawArrays(GL_TRIANGLES, ...);
+
+        // Render glasses
+        glBindVertexArray(glassesVAO);
+        // Draw glasses
+        // glDrawArrays(GL_TRIANGLES, ...);
+
+        // Render cup
+        glBindVertexArray(cupVAO);
+        // Draw cup
+        // glDrawArrays(GL_TRIANGLES, ...);
+
+        // Swap buffers, poll events, etc.
+        // ...
+
+        glfwSwapBuffers(window);
+        glfwPollEvents();
+    }
+
+    // Clean up resources, terminate GLFW, etc.
+    // ...
+
+    return 0;
+}
+

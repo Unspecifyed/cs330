@@ -1,0 +1,5 @@
+Shader linking error: Vertex info
+-----------
+0(21) : error C1503: undefined variable "model"
+(0) : error C2003: incompatible options for link
+
